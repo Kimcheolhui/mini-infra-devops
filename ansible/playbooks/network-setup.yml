@@ -1,0 +1,38 @@
+- name: Network Interface Configuration for Data Plane
+  hosts: all
+  become: yes
+  tasks:
+    - name: Netplan File Configuration
+      copy:
+        dest: "/etc/netplan/50-cloud-init.yaml"
+        content: |
+          network:
+            version: 2
+            ethernets:
+              {{ mc_nic }}: # Management & Control Plane NIC
+                dhcp4: false
+                addresses:
+                - {{ ansible_host }}/24
+                routes:
+                - to: default
+                  via: {{ mc_default_gateway }}
+                nameservers:
+                  addresses:
+                  - 8.8.8.8
+                  - 8.8.4.4
+                  search: []
+              {{ data_nic }}: # Data Plane NIC (E200: eno4, E300: eno8)
+                dhcp4: false
+                addresses:
+                - {{ data_ip }}/24
+                routes:
+                - to: 192.168.0.0/18
+                  via: {{ data_default_gateway }}
+      notify: Netplan Apply
+
+  handlers:
+    - name: Netplan Generate
+      command: netplan generate
+
+    - name: Netplan Apply
+      command: netplan apply
