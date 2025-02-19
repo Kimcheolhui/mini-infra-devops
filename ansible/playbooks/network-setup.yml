@@ -21,7 +21,7 @@
                   - 8.8.8.8
                   - 8.8.4.4
                   search: []
-              {{ data_nic }}: # Data Plane NIC (E200: eno4, E300: eno8)
+              {{ data_nic }}: # Data Plane NIC (E200: eno4, E300: eno6(UTP) or eno8(SFP))
                 dhcp4: false
                 addresses:
                 - {{ data_ip }}/24
