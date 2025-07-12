@@ -1,0 +1,6 @@
+---
+- name: Reset NVIDIA, CUDA, and cuDNN
+  hosts: gpu
+  become: yes
+  roles:
+    - nvidia_reset

@@ -1,0 +1,35 @@
+---
+- name: Remove existing NVIDIA drivers
+  apt:
+    name: "*nvidia*"
+    state: absent
+    autoremove: yes
+  ignore_errors: yes
+
+- name: Remove CUDA
+  apt:
+    name: "cuda"
+    state: absent
+    autoremove: yes
+  ignore_errors: yes
+
+- name: Remove cuDNN
+  apt:
+    name: "cudnn"
+    state: absent
+    autoremove: yes
+  ignore_errors: yes
+
+- name: Remove cuda-keyring
+  apt:
+    name: "cuda-keyring"
+    state: absent
+    purge: yes
+  ignore_errors: yes
+
+- name: Remove NVIDIA Container Toolkit
+  apt:
+    name: "nvidia-container-toolkit"
+    state: absent
+    purge: yes
+  ignore_errors: yes

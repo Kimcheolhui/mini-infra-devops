@@ -1,0 +1,5 @@
+---
+- name: Install cuDNN
+  apt:
+    name: "cudnn"
+    state: present

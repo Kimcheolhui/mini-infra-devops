@@ -1,0 +1,11 @@
+---
+- name: Restore original apt sources from backup if it exists
+  command: cp -r /etc/apt/sources.list.d.backup /etc/apt/sources.list.d
+  args:
+    warn: false
+  ignore_errors: yes
+
+- name: Update package lists after restoring sources
+  apt:
+    update_cache: yes
+  ignore_errors: yes

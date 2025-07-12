@@ -1,0 +1,71 @@
+---
+- name: Reset NVIDIA, CUDA, and cuDNN
+  hosts: gpu
+  become: yes
+  tasks:
+
+    - name: Remove existing NVIDIA drivers
+      apt:
+        name: "*nvidia*"
+        state: absent
+        autoremove: yes
+      ignore_errors: yes
+
+    - name: Remove CUDA
+      apt:
+        name: "cuda"
+        state: absent
+        autoremove: yes
+      ignore_errors: yes
+
+    - name: Remove cuDNN
+      apt:
+        name: "cudnn"
+        state: absent
+        autoremove: yes
+      ignore_errors: yes
+
+    - name: Remove cuda-keyring
+      apt:
+        name: "cuda-keyring"
+        state: absent
+        purge: yes
+      ignore_errors: yes
+
+    - name: Remove CUDA-related repository files
+      file:
+        path: "/etc/apt/sources.list.d/cuda*"
+        state: absent
+      ignore_errors: yes
+
+    - name: Clean up unused packages
+      apt:
+        autoremove: yes
+        autoclean: yes
+      ignore_errors: yes
+
+    - name: Remove CUDA environment variables from .bashrc (PATH)
+      replace:
+        path: "~/.bashrc"
+        regexp: '^(.*)(export PATH=/usr/local/cuda-.*)(\n)?'
+        replace: ''
+      ignore_errors: yes
+
+    - name: Remove CUDA environment variables from .bashrc (LD_LIBRARY_PATH)
+      replace:
+        path: "~/.bashrc"
+        regexp: '^(.*)(export LD_LIBRARY_PATH=/usr/local/cuda-.*)(\n)?'
+        replace: ''
+      ignore_errors: yes
+
+    - name: (Optional) Remove leftover symbolic links (if any)
+      file:
+        path: "/usr/local/cuda/include/cudnn*"
+        state: absent
+      ignore_errors: yes
+
+    - name: (Optional) Remove leftover CUDA install directory symlinks
+      file:
+        path: "/usr/local/cuda"
+        state: absent
+      ignore_errors: yes

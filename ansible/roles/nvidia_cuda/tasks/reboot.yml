@@ -1,0 +1,4 @@
+---
+- name: Reboot the system after CUDA installation
+  reboot:
+    reboot_timeout: 600

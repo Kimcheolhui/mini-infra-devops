@@ -1,0 +1,6 @@
+---
+- name: Install NVIDIA Driver, CUDA, and cuDNN
+  hosts: gpu
+  become: yes
+  roles:
+    - nvidia_cuda

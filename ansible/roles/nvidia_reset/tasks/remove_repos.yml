@@ -1,0 +1,6 @@
+---
+- name: Remove CUDA-related repository files
+  file:
+    path: "/etc/apt/sources.list.d/cuda*"
+    state: absent
+  ignore_errors: yes

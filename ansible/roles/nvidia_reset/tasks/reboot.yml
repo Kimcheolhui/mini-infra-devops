@@ -1,0 +1,4 @@
+---
+- name: Reboot the system after NVIDIA removal
+  reboot:
+    reboot_timeout: 600

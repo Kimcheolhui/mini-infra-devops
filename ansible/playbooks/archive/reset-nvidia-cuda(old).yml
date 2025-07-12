@@ -1,0 +1,60 @@
+---
+- name: Reset NVIDIA Driver, CUDA, and cuDNN
+  hosts: gpu
+  become: yes
+  tasks:
+
+    - name: Restore repository sources
+      command: cp -r /etc/apt/sources.list.d.backup /etc/apt/sources.list.d
+      ignore_errors: yes
+
+    - name: Remove NVIDIA repository files
+      file:
+        path: "/etc/apt/sources.list.d/cuda-ubuntu2404-x86_64.list"
+        state: absent
+      ignore_errors: yes
+
+    - name: Remove NVIDIA drivers, CUDA, and cuDNN
+      apt:
+        name:
+          - "*nvidia*"
+          - "cuda*"
+          - "cudnn"
+        state: absent
+        autoremove: yes
+      ignore_errors: yes
+
+    - name: Remove CUDA Toolkit environment variables from .bashrc
+      lineinfile:
+        path: "~/.bashrc"
+        state: absent
+        regexp: '^export (PATH|LD_LIBRARY_PATH)=/usr/local/cuda.*'
+
+    - name: Remove cuDNN symbolic links
+      file:
+        path: "/usr/local/cuda/include/cudnn_version.h"
+        state: absent
+      ignore_errors: yes
+
+    - name: Remove NVIDIA repository key
+      file:
+        path: "/tmp/cuda-keyring_1.1-1_all.deb"
+        state: absent
+      ignore_errors: yes
+
+    - name: Update package lists
+      apt:
+        update_cache: yes
+
+    - name: Reboot the system
+      reboot:
+
+    - name: Verify removal of NVIDIA drivers
+      command: "nvidia-smi"
+      register: nvidia_smi_check
+      ignore_errors: yes
+
+    - name: Verify removal of CUDA runtime
+      command: "nvcc --version"
+      register: nvcc_check
+      ignore_errors: yes

@@ -1,0 +1,4 @@
+---
+- name: Backup existing repository sources
+  command: cp -r /etc/apt/sources.list.d /etc/apt/sources.list.d.backup
+  ignore_errors: yes

@@ -1,0 +1,14 @@
+---
+galaxy_info:
+  author: Cheolhui Kim
+  description: Ansible role to install NVIDIA CUDA and cuDNN
+  license: MIT
+  min_ansible_version: 2.9
+  platforms:
+    - name: Ubuntu
+      versions:
+        - all
+  galaxy_tags:
+    - cuda
+    - nvidia
+    - deep-learning

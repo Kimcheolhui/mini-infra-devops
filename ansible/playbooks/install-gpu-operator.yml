@@ -1,0 +1,49 @@
+---
+- name: Install NVIDIA GPU Operator via Helm
+  hosts: gpu-master1
+  become: yes
+  tasks:
+    - name: Ensure curl and ca-certificates are installed
+      apt:
+        name:
+          - curl
+          - ca-certificates
+        state: present
+        update_cache: yes
+
+    - name: Check if Helm is already installed
+      command: helm version --short
+      register: helm_check
+      failed_when: false
+      changed_when: false
+      ignore_errors: yes
+
+    - name: Install Helm 3 if not present
+      shell: |
+        curl -fsSL https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash
+      args:
+        executable: /bin/bash
+      when: helm_check.rc != 0
+
+    - name: Add NVIDIA Helm repo
+      shell: helm repo add nvidia https://helm.ngc.nvidia.com/nvidia
+      args:
+        executable: /bin/bash
+      ignore_errors: yes
+
+    - name: Update Helm repo
+      shell: helm repo update
+      args:
+        executable: /bin/bash
+
+    - name: Install GPU Operator
+      shell: |
+        helm install --generate-name \
+          --namespace gpu-operator --create-namespace \
+          nvidia/gpu-operator \
+         --set driver.enabled=false \
+         --set toolkit.enabled=false \
+         --set nfd.enabled=false
+      args:
+        executable: /bin/bash
+      # 참고: https://docs.nvidia.com/datacenter/cloud-native/gpu-operator/latest/getting-started.html

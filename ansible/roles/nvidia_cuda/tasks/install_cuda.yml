@@ -1,0 +1,29 @@
+---
+- name: Download NVIDIA repository key
+  get_url:
+    # 버전에 맞게 수정 필요함
+    url: "https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2404/x86_64/cuda-keyring_1.1-1_all.deb"
+    dest: "/tmp/cuda-keyring_1.1-1_all.deb"
+    mode: '0644'
+    force: yes
+
+- name: Install NVIDIA repository key (cuda-keyring)
+  apt:
+    # 버전에 맞게 수정 필요함
+    deb: "/tmp/cuda-keyring_1.1-1_all.deb"
+    force_apt_get: yes
+    dpkg_options: "force-confdef,force-confold"
+
+- name: Update package lists
+  apt:
+    update_cache: yes
+
+- name: Install CUDA Toolkit
+  apt:
+    name: "cuda"
+    state: present
+
+- name: Install NVIDIA Container Toolkit
+  apt:
+    name: "nvidia-container-toolkit"
+    state: present

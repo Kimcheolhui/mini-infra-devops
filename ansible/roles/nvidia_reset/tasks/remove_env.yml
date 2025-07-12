@@ -1,0 +1,14 @@
+---
+- name: Remove CUDA environment variables from .bashrc (PATH)
+  replace:
+    path: "~/.bashrc"
+    regexp: '^(.*)(export PATH=/usr/local/cuda-.*)(\n)?'
+    replace: ''
+  ignore_errors: yes
+
+- name: Remove CUDA environment variables from .bashrc (LD_LIBRARY_PATH)
+  replace:
+    path: "~/.bashrc"
+    regexp: '^(.*)(export LD_LIBRARY_PATH=/usr/local/cuda-.*)(\n)?'
+    replace: ''
+  ignore_errors: yes

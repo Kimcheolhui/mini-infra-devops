@@ -1,0 +1,24 @@
+---
+- name: Check if NVIDIA GPU is present
+  shell: "lspci | grep -i NVIDIA"
+  register: gpu_check
+  ignore_errors: yes
+
+- name: Remove existing NVIDIA drivers
+  apt:
+    name: "*nvidia*"
+    state: absent
+    autoremove: yes
+  when: gpu_check.rc == 0
+
+- name: Remove existing cuda-keyring if present
+  apt:
+    name: "cuda-keyring"
+    state: absent
+    purge: yes
+  ignore_errors: yes
+
+- name: Autoremove unused packages
+  apt:
+    autoremove: yes
+  ignore_errors: yes

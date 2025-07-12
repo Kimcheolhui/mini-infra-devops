@@ -1,0 +1,6 @@
+---
+- name: Clean up unused packages
+  apt:
+    autoremove: yes
+    autoclean: yes
+  ignore_errors: yes

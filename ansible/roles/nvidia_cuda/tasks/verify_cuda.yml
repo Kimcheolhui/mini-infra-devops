@@ -1,0 +1,10 @@
+---
+- name: Check NVIDIA driver installation
+  command: "nvidia-smi"
+  register: nvidia_smi_check
+  ignore_errors: yes
+
+- name: Check CUDA runtime version
+  command: "nvcc --version"
+  register: nvcc_check
+  ignore_errors: yes

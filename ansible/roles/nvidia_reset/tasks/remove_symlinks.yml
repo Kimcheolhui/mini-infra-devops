@@ -1,0 +1,12 @@
+---
+- name: Remove leftover symbolic links for cuDNN
+  file:
+    path: "/usr/local/cuda/include/cudnn*"
+    state: absent
+  ignore_errors: yes
+
+- name: Remove leftover CUDA install directory symlinks
+  file:
+    path: "/usr/local/cuda"
+    state: absent
+  ignore_errors: yes

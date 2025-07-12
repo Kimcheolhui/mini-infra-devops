@@ -1,0 +1,8 @@
+---
+- import_tasks: remove_packages.yml
+- import_tasks: remove_repos.yml
+- import_tasks: restore_backup.yml
+- import_tasks: clean_system.yml
+- import_tasks: remove_env.yml
+- import_tasks: remove_symlinks.yml
+- import_tasks: reboot.yml

@@ -1,0 +1,114 @@
+---
+# 모듈화: https://chatgpt.com/share/67cd7fff-8de8-800d-9b6f-964fc42fb568
+- name: Install NVIDIA Driver, CUDA, and cuDNN
+  hosts: gpu
+  become: yes
+  tasks:
+
+    - name: Backup existing repository sources
+      command: cp -r /etc/apt/sources.list.d /etc/apt/sources.list.d.backup
+      ignore_errors: yes
+
+    - name: Check if NVIDIA GPU is present
+      shell: "lspci | grep -i NVIDIA"
+      register: gpu_check
+      ignore_errors: yes
+
+    - name: Remove existing NVIDIA drivers
+      apt:
+        name: "*nvidia*"
+        state: absent
+        autoremove: yes
+      when: gpu_check.rc == 0
+
+    ################################################################
+    # (중요) cuda-keyring 관련 패키지를 완전히 제거해서
+    #        새로운 .deb 설치 시 반드시 repo 파일이 다시 생성되도록 함
+    ################################################################
+    - name: Remove existing cuda-keyring if present
+      apt:
+        name: "cuda-keyring"
+        state: absent
+        purge: yes
+      ignore_errors: yes
+
+    - name: Autoremove unused packages
+      apt:
+        autoremove: yes
+      ignore_errors: yes
+
+    - name: Download NVIDIA repository key
+      get_url:
+        url: "https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2404/x86_64/cuda-keyring_1.1-1_all.deb"
+        dest: "/tmp/cuda-keyring_1.1-1_all.deb"
+        mode: '0644'
+        force: yes   # 파일이 이미 있어도 덮어쓰도록
+
+    - name: Install NVIDIA repository key (cuda-keyring)
+      apt:
+        deb: "/tmp/cuda-keyring_1.1-1_all.deb"
+        force_apt_get: yes  # 필요 시 강제 apt-get
+        dpkg_options: "force-confdef,force-confold"
+
+    ################################################################
+    # 위 단계에서 /etc/apt/sources.list.d 아래에 NVIDIA repo가
+    # 다시 생성되었을 것이므로 이후 apt update를 다시 수행
+    ################################################################
+    - name: Update package lists
+      apt:
+        update_cache: yes
+
+    - name: Install CUDA Toolkit
+      apt:
+        name: "cuda"
+        state: present
+
+    - name: Reboot the system
+      reboot:
+      when: gpu_check.rc == 0
+
+    - name: Check NVIDIA driver installation
+      command: "nvidia-smi"
+      register: nvidia_smi_check
+      ignore_errors: yes
+
+    - name: Check CUDA runtime version
+      command: "nvcc --version"
+      register: nvcc_check
+      ignore_errors: yes
+
+    - name: Ensure CUDA environment variables are set
+      blockinfile:
+        path: "~/.bashrc"
+        block: |
+          export PATH=/usr/local/cuda-12.8/bin:$PATH
+          export LD_LIBRARY_PATH=/usr/local/cuda-12.8/lib64:$LD_LIBRARY_PATH
+      when: nvcc_check.rc != 0
+
+    - name: Reload bashrc
+      shell: "source ~/.bashrc"
+      args:
+        executable: /bin/bash
+
+    - name: Install cuDNN
+      apt:
+        name: "cudnn"
+        state: present
+
+    - name: Verify cuDNN installation
+      shell: "dpkg -l | grep cudnn"
+      register: cudnn_check
+
+    - name: Check cuDNN header file
+      stat:
+        path: "/usr/local/cuda/include/cudnn_version.h"
+      register: cudnn_header_check
+
+    - name: Check existing cuDNN symbolic links
+      shell: "ls -l /usr/local/cuda/include/cudnn*"
+      register: cudnn_symlink_check
+      ignore_errors: yes
+
+    - name: Create cuDNN symbolic links if missing
+      command: "ln -sf /usr/include/cudnn*.h /usr/local/cuda/include/"
+      when: not cudnn_header_check.stat.exists

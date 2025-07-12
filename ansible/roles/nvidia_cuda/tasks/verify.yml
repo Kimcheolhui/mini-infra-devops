@@ -1,0 +1,28 @@
+---
+- name: Check NVIDIA driver installation
+  command: "nvidia-smi"
+  register: nvidia_smi_check
+  ignore_errors: yes
+
+- name: Check CUDA runtime version
+  command: "nvcc --version"
+  register: nvcc_check
+  ignore_errors: yes
+
+- name: Verify cuDNN installation
+  shell: "dpkg -l | grep cudnn"
+  register: cudnn_check
+
+- name: Check cuDNN header file
+  stat:
+    path: "/usr/local/cuda/include/cudnn_version.h"
+  register: cudnn_header_check
+
+- name: Check existing cuDNN symbolic links
+  shell: "ls -l /usr/local/cuda/include/cudnn*"
+  register: cudnn_symlink_check
+  ignore_errors: yes
+
+- name: Create cuDNN symbolic links if missing
+  command: "ln -sf /usr/include/cudnn*.h /usr/local/cuda/include/"
+  when: not cudnn_header_check.stat.exists

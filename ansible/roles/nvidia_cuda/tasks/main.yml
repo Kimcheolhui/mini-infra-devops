@@ -1,0 +1,9 @@
+---
+- import_tasks: backup.yml
+- import_tasks: remove_old.yml
+- import_tasks: install_cuda.yml
+- import_tasks: verify_cuda.yml
+- import_tasks: reboot.yml
+- import_tasks: install_cudnn.yml
+- import_tasks: verify_cudnn.yml
+- import_tasks: set_env.yml
